@@ -6,7 +6,7 @@ add_executable(synthesizer
 )
 
 if(${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
-  target_compile_options(synthesizer PLATFORM_WINDOWS)
+  target_compile_definitions(synthesizer PUBLIC PLATFORM_WINDOWS)
 
   set(SDL2_INCLUDE_DIR /Users/charlotte/Downloads/SDL2-2.0.12/x86_64-w64-mingw32/include/SDL2)
   set(SDL2_LIBDIR /Users/charlotte/Downloads/SDL2-2.0.12/x86_64-w64-mingw32/lib) 
