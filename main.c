@@ -14,17 +14,22 @@ main(int argc, char *argv[])
 {
 	printf("*** SYNTHESIZER ***\n");
 
-	SDL_Init(SDL_INIT_AUDIO|SDL_INIT_EVENTS|SDL_INIT_JOYSTICK|SDL_INIT_GAMECONTROLLER);
 	SDL_Window *win = NULL;
 	SDL_Renderer *renderer = NULL;
-	SDL_CreateWindowAndRenderer(1280, 720, 0, &win, &renderer);
-	SDL_SetWindowTitle(win, "Synthesizer");
-
 	SDL_GameController *controller = NULL;
+
+	SDL_Init(SDL_INIT_AUDIO|SDL_INIT_EVENTS|SDL_INIT_JOYSTICK|SDL_INIT_GAMECONTROLLER);
+
 	if (SDL_NumJoysticks() > 0) {
 		controller = SDL_GameControllerOpen(0);
 		printf("Found controller: %s\n", SDL_GameControllerNameForIndex(0));
+	} else {
+		fprintf(stderr, "Couldn't find any controllers, aborting\n");
+		goto fail;
 	}
+
+	SDL_CreateWindowAndRenderer(1280, 720, 0, &win, &renderer);
+	SDL_SetWindowTitle(win, "Synthesizer");
 
 	fluid_settings_t *settings;
 	fluid_synth_t *synth;
@@ -32,12 +37,17 @@ main(int argc, char *argv[])
 	int soundfont;
 
 	settings = new_fluid_settings();
-	//fluid_settings_setstr(settings, "audio.driver", "dsound");
+
+#ifdef PLATFORM_WINDOWS
+	fluid_settings_setstr(settings, "audio.driver", "dsound");
+#else
 	fluid_settings_setstr(settings, "audio.driver", "sdl2");
+#endif /* PLATFORM_WINDOWS */
 
 	synth = new_fluid_synth(settings);
 	driver = new_fluid_audio_driver(settings, synth);
-	soundfont = fluid_synth_sfload(synth, "../data/GeneralUser_GS_v1.471.sf2", 1);
+	// XXX make sure this file exists
+	soundfont = fluid_synth_sfload(synth, "./data/GeneralUser_GS_v1.471.sf2", 1);
 	//fluid_synth_set_reverb_on(synth, true);
 	//fluid_synth_set_reverb_level(synth, 1.0);
 	//fluid_synth_set_reverb_roomsize(synth, 1.0);
@@ -121,4 +131,10 @@ main(int argc, char *argv[])
 	SDL_Quit();
 
 	return EXIT_SUCCESS;
+
+fail:
+	if (renderer) SDL_DestroyRenderer(renderer);
+	if (win) SDL_DestroyWindow(win);
+	SDL_Quit();
+	return EXIT_FAILURE;
 }

@@ -1,7 +1,13 @@
 cmake_minimum_required(VERSION 3.0)
 project(synthesizer)
 
+add_executable(synthesizer
+  main.c
+)
+
 if(${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
+  target_compile_options(synthesizer PLATFORM_WINDOWS)
+
   set(SDL2_INCLUDE_DIR /Users/charlotte/Downloads/SDL2-2.0.12/x86_64-w64-mingw32/include/SDL2)
   set(SDL2_LIBDIR /Users/charlotte/Downloads/SDL2-2.0.12/x86_64-w64-mingw32/lib) 
 
@@ -29,9 +35,6 @@ else()
   set(LIBRARIES ${SDL2_LIBRARIES} ${LIBFLUIDSYNTH})
 endif()
 
-add_executable(synthesizer
-  main.c
-)
 
 target_include_directories(synthesizer SYSTEM PUBLIC ${INCLUDE_DIRS})
 target_link_libraries(synthesizer ${LIBRARIES})
